@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专业厨房料汁配方计算器</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 15px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* 装饰元素 */
+    .decor-top {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 180px;
+      height: 180px;
+      background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+      opacity: 0.08;
+      z-index: 1;
+    }
+    
+    .decor-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(45deg, #3498db, #2c3e50);
+      clip-path: polygon(0 100%, 0 0, 100% 100%);
+      opacity: 0.08;
+      z-index: 1;
+    }
+    
+    header {
+      background: linear-gradient(90deg, #e44d26, #f16529);
+      color: white;
+      text-align: center;
+      padding: 25px 20px;
+      position: relative;
+      overflow: hidden;
+      z-index: 2;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* 标签页导航 */
+    .tabs-container {
+      position: relative;
+      z-index: 2;
+      overflow-x: auto;
+      background: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      padding: 0 10px;
+    }
+    
+    .tabs {
+      display: flex;
+      min-width: 800px;
+    }
+    
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 16px 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab:hover {
+      background: #e9ecef;
+    }
+    
+    .tab.active {
+      background: #2ecc71;
+      color: white;
+      border-bottom: 3px solid #27ae60;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 25px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .calculator {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .input-section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .input-title {
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .input-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .serving-input {
+      width: 85px;
+      height: 52px;
+      font-size: 1.6rem;
+      text-align: center;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      outline: none;
+      font-weight: bold;
+      color: #2c3e50;
+      transition: all 0.3s ease;
+    }
+    
+    .serving-input:focus {
+      border-color: #e44d26;
+      box-shadow: 0 0 6px rgba(228, 77, 38, 0.4);
+    }
+    
+    .serving-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .serving-btn:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    .serving-label {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    
+    .content-wrapper {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .ingredients-section {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      color: white;
+      padding: 12px 18px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .ingredients-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+      padding: 18px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .ingredient-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .ingredient-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+    
+    .ingredient-icon {
+      width: 48px;
+      height: 48px;
+      background: #e3f2fd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #3498db;
+    }
+    
+    .ingredient-info {
+      flex: 1;
+    }
+    
+    .ingredient-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 3px;
+    }
+    
+    .ingredient-amount {
+      font-size: 1.05rem;
+      color: #7f8c8d;
+    }
+    
+    .base-amount {
+      font-size: 0.85rem;
+      color: #95a5a6;
+    }
+    
+    .summary-section {
+      flex: 0 0 320px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .summary-content {
+      padding: 18px;
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .summary-label {
+      font-size: 1.05rem;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .summary-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+    
+    .total-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    
+    .total-label {
+      font-size: 1.1rem;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+    }
+    
+    .total-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    
+    .btn {
+      padding: 13px 35px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(90deg, #e44d26, #f16529);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(90deg, #3498db, #2980b9);
+      color: white;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #f8f9fa;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      border-top: 1px solid #eee;
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* 动画效果 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .ingredient-card {
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 1100px) {
+      .content-wrapper {
+        flex-direction: column;
+      }
+      
+      .summary-section {
+        flex: 1;
+      }
+      
+      .ingredients-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+    }
+    
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .tab-content {
+        padding: 20px 15px;
+      }
+      
+      .serving-input {
+        width: 70px;
+        height: 45px;
+        font-size: 1.5rem;
+      }
+      
+      .ingredient-card {
+        padding: 12px;
+      }
+      
+      .ingredient-name {
+        font-size: 1.1rem;
+      }
+      
+      .btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .tabs {
+        flex-direction: column;
+        min-width: 0;
+      }
+      
+      .tab {
+        padding: 12px;
+      }
+      
+      .input-title {
+        font-size: 1.3rem;
+      }
+      
+      .section-title {
+        font-size: 1.2rem;
+      }
+    }
+    
+    /* 滚动条美化 */
+    .ingredients-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .ingredients-grid::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .ingredients-grid::-webkit-scrollbar-thumb {
+      background: #3498db;
+      border-radius: 10px;
+    }
+    
+    .ingredients-grid::-webkit-scrollbar-thumb:hover {
+      background: #2980b9;
+    }
+    
+    /* 打印优化 */
+    @media print {
+      .actions, .input-title i, .serving-btn, .decor-top, .decor-bottom, .tabs-container {
+        display: none !important;
+      }
+      .container {
+        box-shadow: none;
+        max-width: 100%;
+        background: white;
+      }
+      body {
+        background: white !important;
+        padding: 0;
+      }
+      .input-section, .ingredients-section, .summary-section {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      .summary-value, .total-value {
+        color: black;
+      }
+      .tab-content {
+        display: block !important;
+        padding: 10px;
+      }
+      .content-wrapper {
+        flex-direction: row;
+      }
+      .ingredients-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="decor-top"></div>
+    <div class="decor-bottom"></div>
+    
+    <header>
+      <h1><i class="fas fa-mortar-pestle"></i> 专业厨房料汁配方计算器</h1>
+      <p class="subtitle">六款经典料汁配方，一键计算精确用量</p>
+    </header>
+    
+    <div class="tabs-container">
+      <div class="tabs">
+        <div class="tab active" data-tab="bazhen">八珍豆腐汁</div>
+        <div class="tab" data-tab="gongbao">宫保鸡丁汁</div>
+        <div class="tab" data-tab="jingjiang">京酱汁</div>
+        <div class="tab" data-tab="tangcu">糖醋汁</div>
+        <div class="tab" data-tab="laobao">老爆三汁</div>
+        <div class="tab" data-tab="sanbei">三杯鸡汁</div>
+      </div>
+    </div>
+    
+    <!-- 八珍豆腐汁计算器 -->
+    <div id="bazhen" class="tab-content active">
+      <div class="calculator">
+        <div class="input-section">
+          <h2 class="input-title">
+            <i class="fas fa-utensils"></i> 八珍豆腐汁配方计算
+          </h2>
+          <div class="input-group">
+            <button class="serving-btn" id="bazhen-decrease-btn">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="serving-input" id="bazhen-serving-input" min="1" max="20" value="1">
+            <button class="serving-btn" id="bazhen-increase-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="serving-label">份</span>
+          </div>
+        </div>
+        
+        <div class="content-wrapper">
+          <div class="ingredients-section">
+            <div class="section-title">
+              <i class="fas fa-list"></i> 原料用量清单
+            </div>
+            <div class="ingredients-grid" id="bazhen-ingredients-grid">
+              <!-- 原料卡片将通过JavaScript动态生成 -->
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <div class="section-title">
+              <i class="fas fa-clipboard-list"></i> 配方总览
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 柱侯酱
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-1">150克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 沙茶酱
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-2">50克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 海鲜酱
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-3">350克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-oil-can"></i> 耗油
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-4">250克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-mortar-pestle"></i> 胡椒粉
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-5">20克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 料酒
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-6">100克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 味精
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-7">30克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 鸡精
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-8">30克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-cube"></i> 白糖
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-9">150克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-tint"></i> 美极鲜
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-10">150克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 番茄酱
+                </div>
+                <div class="summary-value" id="bazhen-ingredient-11">200克</div>
+              </div>
+              
+              <div class="total-box">
+                <div class="total-label">配方总重量</div>
+                <div class="total-value" id="bazhen-total-weight">1880克</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" id="bazhen-print-btn">
+            <i class="fas fa-print"></i> 打印配方
+          </button>
+          <button class="btn btn-secondary" id="bazhen-reset-btn">
+            <i class="fas fa-redo"></i> 重置计算器
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 宫保鸡丁汁计算器 -->
+    <div id="gongbao" class="tab-content">
+      <div class="calculator">
+        <div class="input-section">
+          <h2 class="input-title">
+            <i class="fas fa-utensils"></i> 宫保鸡丁汁配方计算
+          </h2>
+          <div class="input-group">
+            <button class="serving-btn" id="gongbao-decrease-btn">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="serving-input" id="gongbao-serving-input" min="1" max="20" value="1">
+            <button class="serving-btn" id="gongbao-increase-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="serving-label">份</span>
+          </div>
+        </div>
+        
+        <div class="content-wrapper">
+          <div class="ingredients-section">
+            <div class="section-title">
+              <i class="fas fa-list"></i> 原料用量清单
+            </div>
+            <div class="ingredients-grid" id="gongbao-ingredients-grid">
+              <!-- 原料卡片将通过JavaScript动态生成 -->
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <div class="section-title">
+              <i class="fas fa-clipboard-list"></i> 配方总览
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 豆瓣酱
+                </div>
+                <div class="summary-value" id="gongbao-ingredient-1">1500克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-cubes"></i> 砂糖
+                </div>
+                <div class="summary-value" id="gongbao-ingredient-2">4000克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 陈醋
+                </div>
+                <div class="summary-value" id="gongbao-ingredient-3">1500克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 味精
+                </div>
+                <div class="summary-value" id="gongbao-ingredient-4">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 鸡精
+                </div>
+                <div class="summary-value" id="gongbao-ingredient-5">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-mortar-pestle"></i> 胡椒粉
+                </div>
+                <div class="summary-value" id="gongbao-ingredient-6">100克</div>
+              </div>
+              
+              <div class="total-box">
+                <div class="total-label">配方总重量</div>
+                <div class="total-value" id="gongbao-total-weight">11400克</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" id="gongbao-print-btn">
+            <i class="fas fa-print"></i> 打印配方
+          </button>
+          <button class="btn btn-secondary" id="gongbao-reset-btn">
+            <i class="fas fa-redo"></i> 重置计算器
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 京酱汁计算器 -->
+    <div id="jingjiang" class="tab-content">
+      <div class="calculator">
+        <div class="input-section">
+          <h2 class="input-title">
+            <i class="fas fa-utensils"></i> 京酱汁配方计算
+          </h2>
+          <div class="input-group">
+            <button class="serving-btn" id="jingjiang-decrease-btn">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="serving-input" id="jingjiang-serving-input" min="1" max="20" value="1">
+            <button class="serving-btn" id="jingjiang-increase-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="serving-label">份</span>
+          </div>
+        </div>
+        
+        <div class="content-wrapper">
+          <div class="ingredients-section">
+            <div class="section-title">
+              <i class="fas fa-list"></i> 原料用量清单
+            </div>
+            <div class="ingredients-grid" id="jingjiang-ingredients-grid">
+              <!-- 原料卡片将通过JavaScript动态生成 -->
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <div class="section-title">
+              <i class="fas fa-clipboard-list"></i> 配方总览
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 甜面酱
+                </div>
+                <div class="summary-value" id="jingjiang-ingredient-1">4500克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-cubes"></i> 砂糖
+                </div>
+                <div class="summary-value" id="jingjiang-ingredient-2">2600克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-oil-can"></i> 耗油
+                </div>
+                <div class="summary-value" id="jingjiang-ingredient-3">500克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 番茄酱
+                </div>
+                <div class="summary-value" id="jingjiang-ingredient-4">1000克</div>
+              </div>
+              
+              <div class="total-box">
+                <div class="total-label">配方总重量</div>
+                <div class="total-value" id="jingjiang-total-weight">8600克</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" id="jingjiang-print-btn">
+            <i class="fas fa-print"></i> 打印配方
+          </button>
+          <button class="btn btn-secondary" id="jingjiang-reset-btn">
+            <i class="fas fa-redo"></i> 重置计算器
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 糖醋汁计算器 -->
+    <div id="tangcu" class="tab-content">
+      <div class="calculator">
+        <div class="input-section">
+          <h2 class="input-title">
+            <i class="fas fa-utensils"></i> 糖醋汁配方计算
+          </h2>
+          <div class="input-group">
+            <button class="serving-btn" id="tangcu-decrease-btn">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="serving-input" id="tangcu-serving-input" min="1" max="20" value="1">
+            <button class="serving-btn" id="tangcu-increase-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="serving-label">份</span>
+          </div>
+        </div>
+        
+        <div class="content-wrapper">
+          <div class="ingredients-section">
+            <div class="section-title">
+              <i class="fas fa-list"></i> 原料用量清单
+            </div>
+            <div class="ingredients-grid" id="tangcu-ingredients-grid">
+              <!-- 原料卡片将通过JavaScript动态生成 -->
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <div class="section-title">
+              <i class="fas fa-clipboard-list"></i> 配方总览
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-cubes"></i> 砂糖
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-1">2500克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 苹果醋
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-2">1000克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 橙汁
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-3">1000克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 盐
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-4">60克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 水塔白醋
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-5">500克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-jar"></i> 番茄酱
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-6">1000克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-honey-pot"></i> 蜂蜜
+                </div>
+                <div class="summary-value" id="tangcu-ingredient-7">650克</div>
+              </div>
+              
+              <div class="total-box">
+                <div class="total-label">配方总重量</div>
+                <div class="total-value" id="tangcu-total-weight">6710克</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" id="tangcu-print-btn">
+            <i class="fas fa-print"></i> 打印配方
+          </button>
+          <button class="btn btn-secondary" id="tangcu-reset-btn">
+            <i class="fas fa-redo"></i> 重置计算器
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 老爆三汁计算器 -->
+    <div id="laobao" class="tab-content">
+      <div class="calculator">
+        <div class="input-section">
+          <h2 class="input-title">
+            <i class="fas fa-utensils"></i> 老爆三汁配方计算
+          </h2>
+          <div class="input-group">
+            <button class="serving-btn" id="laobao-decrease-btn">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="serving-input" id="laobao-serving-input" min="1" max="20" value="1">
+            <button class="serving-btn" id="laobao-increase-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="serving-label">份</span>
+          </div>
+        </div>
+        
+        <div class="content-wrapper">
+          <div class="ingredients-section">
+            <div class="section-title">
+              <i class="fas fa-list"></i> 原料用量清单
+            </div>
+            <div class="ingredients-grid" id="laobao-ingredients-grid">
+              <!-- 原料卡片将通过JavaScript动态生成 -->
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <div class="section-title">
+              <i class="fas fa-clipboard-list"></i> 配方总览
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 陈醋
+                </div>
+                <div class="summary-value" id="laobao-ingredient-1">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 老抽
+                </div>
+                <div class="summary-value" id="laobao-ingredient-2">160克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 生抽
+                </div>
+                <div class="summary-value" id="laobao-ingredient-3">300克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 料酒
+                </div>
+                <div class="summary-value" id="laobao-ingredient-4">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 盐
+                </div>
+                <div class="summary-value" id="laobao-ingredient-5">60克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 味精
+                </div>
+                <div class="summary-value" id="laobao-ingredient-6">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 鸡精
+                </div>
+                <div class="summary-value" id="laobao-ingredient-7">100克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-cubes"></i> 白糖
+                </div>
+                <div class="summary-value" id="laobao-ingredient-8">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-mortar-pestle"></i> 胡椒粉
+                </div>
+                <div class="summary-value" id="laobao-ingredient-9">15克</div>
+              </div>
+              
+              <div class="total-box">
+                <div class="total-label">配方总重量</div>
+                <div class="total-value" id="laobao-total-weight">1435克</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" id="laobao-print-btn">
+            <i class="fas fa-print"></i> 打印配方
+          </button>
+          <button class="btn btn-secondary" id="laobao-reset-btn">
+            <i class="fas fa-redo"></i> 重置计算器
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 三杯鸡汁计算器 -->
+    <div id="sanbei" class="tab-content">
+      <div class="calculator">
+        <div class="input-section">
+          <h2 class="input-title">
+            <i class="fas fa-utensils"></i> 三杯鸡汁配方计算
+          </h2>
+          <div class="input-group">
+            <button class="serving-btn" id="sanbei-decrease-btn">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="serving-input" id="sanbei-serving-input" min="1" max="20" value="1">
+            <button class="serving-btn" id="sanbei-increase-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="serving-label">份</span>
+          </div>
+        </div>
+        
+        <div class="content-wrapper">
+          <div class="ingredients-section">
+            <div class="section-title">
+              <i class="fas fa-list"></i> 原料用量清单
+            </div>
+            <div class="ingredients-grid" id="sanbei-ingredients-grid">
+              <!-- 原料卡片将通过JavaScript动态生成 -->
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <div class="section-title">
+              <i class="fas fa-clipboard-list"></i> 配方总览
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 石湾米酒
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-1">250克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-fish"></i> 鱼露
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-2">50克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 蒸鱼豉油
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-3">100克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-honey-pot"></i> 蜂蜜
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-4">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-tint"></i> 水
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-5">750克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 金兰酱油
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-6">150克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-flask"></i> 老抽
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-7">100克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-wine-bottle"></i> 醋
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-8">100克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-oil-can"></i> 耗油
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-9">250克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-cubes"></i> 冰糖
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-10">200克</div>
+              </div>
+              
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-tint"></i> 美极鲜
+                </div>
+                <div class="summary-value" id="sanbei-ingredient-11">100克</div>
+              </div>
+              
+              <div class="total-box">
+                <div class="total-label">配方总重量</div>
+                <div class="total-value" id="sanbei-total-weight">2250克</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" id="sanbei-print-btn">
+            <i class="fas fa-print"></i> 打印配方
+          </button>
+          <button class="btn btn-secondary" id="sanbei-reset-btn">
+            <i class="fas fa-redo"></i> 重置计算器
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>专业厨房配方计算器 © 2023 | 六款经典料汁配方 | 精确计量 | 高效便捷 | 支持1-20份配方计算</p>
+    </footer>
+  </div>
+
+  <script>
+    // 所有料汁配方数据
+    const sauces = {
+      bazhen: {
+        id: "bazhen",
+        name: "八珍豆腐汁",
+        ingredients: [
+          { id: "bazhen-ingredient-1", name: "柱侯酱", amount: 150, unit: "克", icon: "fa-jar" },
+          { id: "bazhen-ingredient-2", name: "沙茶酱", amount: 50, unit: "克", icon: "fa-jar" },
+          { id: "bazhen-ingredient-3", name: "海鲜酱", amount: 350, unit: "克", icon: "fa-jar" },
+          { id: "bazhen-ingredient-4", name: "耗油", amount: 250, unit: "克", icon: "fa-oil-can" },
+          { id: "bazhen-ingredient-5", name: "胡椒粉", amount: 20, unit: "克", icon: "fa-mortar-pestle" },
+          { id: "bazhen-ingredient-6", name: "料酒", amount: 100, unit: "克", icon: "fa-wine-bottle" },
+          { id: "bazhen-ingredient-7", name: "味精", amount: 30, unit: "克", icon: "fa-flask" },
+          { id: "bazhen-ingredient-8", name: "鸡精", amount: 30, unit: "克", icon: "fa-flask" },
+          { id: "bazhen-ingredient-9", name: "白糖", amount: 150, unit: "克", icon: "fa-cube" },
+          { id: "bazhen-ingredient-10", name: "美极鲜", amount: 150, unit: "克", icon: "fa-tint" },
+          { id: "bazhen-ingredient-11", name: "番茄酱", amount: 200, unit: "克", icon: "fa-jar" }
+        ]
+      },
+      gongbao: {
+        id: "gongbao",
+        name: "宫保鸡丁汁",
+        ingredients: [
+          { id: "gongbao-ingredient-1", name: "豆瓣酱", amount: 1500, unit: "克", icon: "fa-jar" },
+          { id: "gongbao-ingredient-2", name: "砂糖", amount: 4000, unit: "克", icon: "fa-cubes" },
+          { id: "gongbao-ingredient-3", name: "陈醋", amount: 1500, unit: "克", icon: "fa-wine-bottle" },
+          { id: "gongbao-ingredient-4", name: "味精", amount: 200, unit: "克", icon: "fa-flask" },
+          { id: "gongbao-ingredient-5", name: "鸡精", amount: 200, unit: "克", icon: "fa-flask" },
+          { id: "gongbao-ingredient-6", name: "胡椒粉", amount: 100, unit: "克", icon: "fa-mortar-pestle" }
+        ]
+      },
+      jingjiang: {
+        id: "jingjiang",
+        name: "京酱汁",
+        ingredients: [
+          { id: "jingjiang-ingredient-1", name: "甜面酱", amount: 4500, unit: "克", icon: "fa-jar" },
+          { id: "jingjiang-ingredient-2", name: "砂糖", amount: 2600, unit: "克", icon: "fa-cubes" },
+          { id: "jingjiang-ingredient-3", name: "耗油", amount: 500, unit: "克", icon: "fa-oil-can" },
+          { id: "jingjiang-ingredient-4", name: "番茄酱", amount: 1000, unit: "克", icon: "fa-jar" }
+        ]
+      },
+      tangcu: {
+        id: "tangcu",
+        name: "糖醋汁",
+        ingredients: [
+          { id: "tangcu-ingredient-1", name: "砂糖", amount: 2500, unit: "克", icon: "fa-cubes" },
+          { id: "tangcu-ingredient-2", name: "苹果醋", amount: 1000, unit: "克", icon: "fa-wine-bottle" },
+          { id: "tangcu-ingredient-3", name: "橙汁", amount: 1000, unit: "克", icon: "fa-wine-bottle" },
+          { id: "tangcu-ingredient-4", name: "盐", amount: 60, unit: "克", icon: "fa-flask" },
+          { id: "tangcu-ingredient-5", name: "水塔白醋", amount: 500, unit: "克", icon: "fa-wine-bottle" },
+          { id: "tangcu-ingredient-6", name: "番茄酱", amount: 1000, unit: "克", icon: "fa-jar" },
+          { id: "tangcu-ingredient-7", name: "蜂蜜", amount: 650, unit: "克", icon: "fa-honey-pot" }
+        ]
+      },
+      laobao: {
+        id: "laobao",
+        name: "老爆三汁",
+        ingredients: [
+          { id: "laobao-ingredient-1", name: "陈醋", amount: 200, unit: "克", icon: "fa-wine-bottle" },
+          { id: "laobao-ingredient-2", name: "老抽", amount: 160, unit: "克", icon: "fa-flask" },
+          { id: "laobao-ingredient-3", name: "生抽", amount: 300, unit: "克", icon: "fa-flask" },
+          { id: "laobao-ingredient-4", name: "料酒", amount: 200, unit: "克", icon: "fa-wine-bottle" },
+          { id: "laobao-ingredient-5", name: "盐", amount: 60, unit: "克", icon: "fa-flask" },
+          { id: "laobao-ingredient-6", name: "味精", amount: 200, unit: "克", icon: "fa-flask" },
+          { id: "laobao-ingredient-7", name: "鸡精", amount: 100, unit: "克", icon: "fa-flask" },
+          { id: "laobao-ingredient-8", name: "白糖", amount: 200, unit: "克", icon: "fa-cubes" },
+          { id: "laobao-ingredient-9", name: "胡椒粉", amount: 15, unit: "克", icon: "fa-mortar-pestle" }
+        ]
+      },
+      sanbei: {
+        id: "sanbei",
+        name: "三杯鸡汁",
+        ingredients: [
+          { id: "sanbei-ingredient-1", name: "石湾米酒", amount: 250, unit: "克", icon: "fa-wine-bottle" },
+          { id: "sanbei-ingredient-2", name: "鱼露", amount: 50, unit: "克", icon: "fa-fish" },
+          { id: "sanbei-ingredient-3", name: "蒸鱼豉油", amount: 100, unit: "克", icon: "fa-flask" },
+          { id: "sanbei-ingredient-4", name: "蜂蜜", amount: 200, unit: "克", icon: "fa-honey-pot" },
+          { id: "sanbei-ingredient-5", name: "水", amount: 750, unit: "克", icon: "fa-tint" },
+          { id: "sanbei-ingredient-6", name: "金兰酱油", amount: 150, unit: "克", icon: "fa-flask" },
+          { id: "sanbei-ingredient-7", name: "老抽", amount: 100, unit: "克", icon: "fa-flask" },
+          { id: "sanbei-ingredient-8", name: "醋", amount: 100, unit: "克", icon: "fa-wine-bottle" },
+          { id: "sanbei-ingredient-9", name: "耗油", amount: 250, unit: "克", icon: "fa-oil-can" },
+          { id: "sanbei-ingredient-10", name: "冰糖", amount: 200, unit: "克", icon: "fa-cubes" },
+          { id: "sanbei-ingredient-11", name: "美极鲜", amount: 100, unit: "克", icon: "fa-tint" }
+        ]
+      }
+    };
+
+    // 初始化所有计算器
+    function initCalculators() {
+      for (const sauceId in sauces) {
+        if (sauces.hasOwnProperty(sauceId)) {
+          const sauce = sauces[sauceId];
+          
+          // 获取DOM元素
+          const servingInput = document.getElementById(`${sauceId}-serving-input`);
+          const increaseBtn = document.getElementById(`${sauceId}-increase-btn`);
+          const decreaseBtn = document.getElementById(`${sauceId}-decrease-btn`);
+          const resetBtn = document.getElementById(`${sauceId}-reset-btn`);
+          const printBtn = document.getElementById(`${sauceId}-print-btn`);
+          const ingredientsGrid = document.getElementById(`${sauceId}-ingredients-grid`);
+          const totalWeightEl = document.getElementById(`${sauceId}-total-weight`);
+          
+          // 当前份数
+          let currentServings = 1;
+          
+          // 计算总重量
+          function calculateTotalWeight() {
+            let total = 0;
+            sauce.ingredients.forEach(ingredient => {
+              total += ingredient.amount * currentServings;
+            });
+            return total;
+          }
+          
+          // 渲染原料卡片
+          function renderIngredients() {
+            ingredientsGrid.innerHTML = '';
+            
+            sauce.ingredients.forEach(ingredient => {
+              const totalAmount = ingredient.amount * currentServings;
+              
+              const card = document.createElement('div');
+              card.className = 'ingredient-card';
+              card.innerHTML = `
+                <div class="ingredient-icon">
+                  <i class="fas ${ingredient.icon}"></i>
+                </div>
+                <div class="ingredient-info">
+                  <div class="ingredient-name">${ingredient.name}</div>
+                  <div class="ingredient-amount">${totalAmount} ${ingredient.unit}</div>
+                  <div class="base-amount">1份用量: ${ingredient.amount}${ingredient.unit}</div>
+                </div>
+              `;
+              
+              ingredientsGrid.appendChild(card);
+              
+              // 更新右侧总览面板
+              document.getElementById(ingredient.id).textContent = `${totalAmount}克`;
+            });
+            
+            // 更新总重量
+            const totalWeight = calculateTotalWeight();
+            totalWeightEl.textContent = `${totalWeight}克`;
+          }
+          
+          // 更新份数
+          function updateServings(newValue) {
+            newValue = parseInt(newValue);
+            
+            // 确保在1-20之间
+            if (newValue < 1) newValue = 1;
+            if (newValue > 20) newValue = 20;
+            
+            currentServings = newValue;
+            servingInput.value = currentServings;
+            renderIngredients();
+          }
+          
+          // 事件监听
+          servingInput.addEventListener('input', () => {
+            updateServings(servingInput.value);
+          });
+          
+          servingInput.addEventListener('change', () => {
+            if (!servingInput.value) {
+              servingInput.value = 1;
+              updateServings(1);
+            }
+          });
+          
+          increaseBtn.addEventListener('click', () => {
+            updateServings(currentServings + 1);
+          });
+          
+          decreaseBtn.addEventListener('click', () => {
+            updateServings(currentServings - 1);
+          });
+          
+          resetBtn.addEventListener('click', () => {
+            updateServings(1);
+          });
+          
+          printBtn.addEventListener('click', () => {
+            window.print();
+          });
+          
+          // 初始化渲染
+          renderIngredients();
+        }
+      }
+    }
+    
+    // 标签页切换功能
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // 移除所有活动标签
+          tabs.forEach(t => t.classList.remove('active'));
+          // 隐藏所有内容
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // 激活当前标签
+          tab.classList.add('active');
+          // 显示对应内容
+          const tabId = tab.getAttribute('data-tab');
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+    }
+    
+    // 添加键盘快捷键
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') {
+          const activeTab = document.querySelector('.tab-content.active');
+          const servingInput = activeTab.querySelector('.serving-input');
+          let currentValue = parseInt(servingInput.value) || 1;
+          servingInput.value = Math.min(20, currentValue + 1);
+          servingInput.dispatchEvent(new Event('input'));
+          e.preventDefault();
+        } else if (e.key === 'ArrowDown') {
+          const activeTab = document.querySelector('.tab-content.active');
+          const servingInput = activeTab.querySelector('.serving-input');
+          let currentValue = parseInt(servingInput.value) || 1;
+          servingInput.value = Math.max(1, currentValue - 1);
+          servingInput.dispatchEvent(new Event('input'));
+          e.preventDefault();
+        } else if (e.key === 'r' || e.key === 'R') {
+          const activeTab = document.querySelector('.tab-content.active');
+          const resetBtn = activeTab.querySelector('.btn-secondary');
+          resetBtn.click();
+        } else if (e.key === 'p' || e.key === 'P') {
+          const activeTab = document.querySelector('.tab-content.active');
+          const printBtn = activeTab.querySelector('.btn-primary');
+          printBtn.click();
+        }
+      });
+    }
+    
+    // 页面加载完成后初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      initCalculators();
+      setupTabs();
+      setupKeyboardShortcuts();
+    });
+  </script>
+</body>
+</html>
